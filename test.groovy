@@ -79,28 +79,46 @@ def Message processData(Message message) {
     def input = new XmlSlurper().parseText(body)
     
     // Find the Party element with PartyType="BillFrom" (adjust this if needed)
-    def partyFragment = input.Invoice.Party.find { it.@PartyType == "BillFrom" }
-    
-    if (!partyFragment) {
-        message.setBody("<Response><Error>Party with PartyType 'BillFrom' not found.</Error></Response>")
+    def partySUFragment = input.Invoice.Party.find { it.@PartyType == "BillTo" }
+    def partyBYFragment = input.Invoice.Party.find { it.@PartyType == "SoldTo" }
+
+    if (!partySUFragment) {
+        message.setBody("<Response><Error>Party with PartyType 'BillTo' not found.</Error></Response>")
+        return message
+    }
+    if (!partyBYFragment) {
+        message.setBody("<Response><Error>Party with PartyType 'SoldTo' not found.</Error></Response>")
         return message
     }
     
     // Call createParty passing the already-parsed Party node.
-    def mappedPartyXml = createParty(partyFragment)
+    def mappedPartySUXml = createParty(partySUFragment)
+    def mappedPartyBYXml = createParty(partyBYFragment)
     
+    def currency_code = input.Invoice.GrossAmount.@currencyCode
+    def vatCurrencyCode = input.Invoice.TaxAmount.@currencyCode
+
     // Build the final response XML, appending the mapped party fragment.
     def sw = new StringWriter()
     def xml = new MarkupBuilder(sw)
     
     xml.Response {
         Header {
-            MessageID("12345")
-            Timestamp(new Date().format("yyyy-MM-dd'T'HH:mm:ss"))
-        }
-        Body {
-            // Append the mapped party XML; use yieldUnescaped since it's already XML.
-            mkp.yieldUnescaped(mappedPartyXml)
+            Invoice_number("")
+            Project("")
+            Date(input.Invoice.DocumentDate?: new Date().format("yyyy-MM-dd'T'HH:mm:ss"))
+            Type("FE")
+            UUID("")
+            Copy_indicator("")
+            Currency_code(currency_code?:"")
+            VAT_currency_code(vatCurrencyCode?:"")
+            Payment_terms_code("01")
+            Exchange_rate(1)
+            Payment_means("04")
+            Total_VAT_amount(input.Invoice.TaxAmount)
+            Invoice_total("")
+            mkp.yieldUnescaped(mappedPartySUXml)
+            mkp.yieldUnescaped(mappedPartyBYXml)
         }
     }
     
