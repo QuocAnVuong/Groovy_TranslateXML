@@ -182,21 +182,21 @@ def String createLine(def itemNode) {
         Net_price_with_line_allowances_charges(grossAmount)
         Net_amount_with_taxes(grossAmount)
         mkp.yieldUnescaped(allTaxLinesXml)
-        ADDITIONAL_GROUP_LINE {
-            Name("LINE_AMOUNTS")
-            ADDITIONAL_GROUP_LINE_PROPERTY {
-                Name("LINE_AMOUNTS_NET_TAX_AMOUNT")
-                Value("")
-            }
-            ADDITIONAL_GROUP_LINE_PROPERTY {
-                Name("LINE_AMOUNTS_TOTAL_TAXABLE_AMOUNT")
-                Value("")
-            }
-            ADDITIONAL_GROUP_LINE_PROPERTY {
-                Name("LINE_AMOUNTS_FACTORY_TAX_AMOUNT")
-                Value("")
-            }
-        }
+        // ADDITIONAL_GROUP_LINE {
+        //     Name("LINE_AMOUNTS")
+        //     ADDITIONAL_GROUP_LINE_PROPERTY {
+        //         Name("LINE_AMOUNTS_NET_TAX_AMOUNT")
+        //         Value("")
+        //     }
+        //     ADDITIONAL_GROUP_LINE_PROPERTY {
+        //         Name("LINE_AMOUNTS_TOTAL_TAXABLE_AMOUNT")
+        //         Value("")
+        //     }
+        //     ADDITIONAL_GROUP_LINE_PROPERTY {
+        //         Name("LINE_AMOUNTS_FACTORY_TAX_AMOUNT")
+        //         Value("")
+        //     }
+        // }
     }
     
     return writer.toString()
@@ -223,8 +223,8 @@ def Message processData(Message message) {
     def partyBYFragment = input.Invoice.Party.find { it.@PartyType == "SoldTo" }
 
     // Find the Tax element
-    def headerTax = invoice.HeaderTax
-    def items = invoice.Item
+    def headerTax = input.Invoice.HeaderTax
+    def items = input.Invoice.Item
     def taxFragments = items.collect { item ->
         createTax(headerTax, item)
     }
@@ -244,6 +244,7 @@ def Message processData(Message message) {
     
     def currency_code = input.Invoice.GrossAmount.@currencyCode
     def vatCurrencyCode = input.Invoice.TaxAmount.@currencyCode
+    def mappedLines = []
 
     items.each { item ->
         // Call createLine for each Item node and add the result to our list.
