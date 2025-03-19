@@ -87,7 +87,84 @@ def String createParty(def partyNode, def partyType) {
  * @param itemNode the parsed Item node (a GPathResult)
  * @return the mapped LINE XML as a String
  */
+
+def String createTaxLine(def itemTaxNode) {
+    def writer = new StringWriter()
+    def xml = new MarkupBuilder(writer)
+    
+    xml.TAX_LINE {
+        Tax_category_ID("")
+        Tax_type("")
+        Tax_rate("")
+        Taxable_amount("")
+        Tax_amount("")
+        Tax_class("")
+    }
+    
+    return writer.toString()
+}
+
+/**
+ * createLine – Transforms an Item XML node into the mapped LINE structure.
+ *
+ * @param itemNode the parsed Item node (a GPathResult)
+ * @return the mapped LINE XML as a String
+ */
 def String createLine(def itemNode) {
+
+    def netPrice = ""
+    def netValuePricing = itemNode.PricingElement.find { 
+        it.SupplierConditionTypeName.text() == "Net Value 1" 
+    }
+    if(netValuePricing) {
+        netPrice = netValuePricing.ConditionRateValue.text()
+    } else {
+        // Compute net price as NetAmount divided by InvoicedQuantity (if possible)
+        try {
+            def invoicedQuantity = itemNode.InvoicedQuantity.text().toBigDecimal()
+            def itemNetAmount = itemNode.NetAmount.text().toBigDecimal()
+            if(invoicedQuantity > 0) {
+                netPrice = (itemNetAmount / invoicedQuantity)
+                            .setScale(2, RoundingMode.HALF_UP)
+                            .toString()
+            }
+        } catch(Exception ex) {
+            // Log or handle error if conversion fails; leave netPrice as empty string.
+            netPrice = ""
+        }
+    }
+
+    // Compute Gross Price:
+    def grossPrice = ""
+    def grossValuePricing = itemNode.PricingElement.find { 
+        it.SupplierConditionTypeName.text() == "Gross Value" 
+    }
+    if(grossValuePricing) {
+        grossPrice = grossValuePricing.ConditionRateValue.text()
+    } else {
+        try {
+            def invoicedQuantity = itemNode.InvoicedQuantity.text().toBigDecimal()
+            def itemGrossAmount = itemNode.GrossAmount.text().toBigDecimal()
+            if(invoicedQuantity > 0) {
+                grossPrice = (itemGrossAmount / invoicedQuantity)
+                              .setScale(2, RoundingMode.HALF_UP)
+                              .toString()
+            }
+        } catch(Exception ex) {
+            grossPrice = ""
+        }
+    }
+    
+    // Map net amount and gross amount
+    def netAmount = itemNode.NetAmount.text() ?: ""
+    def grossAmount = itemNode.GrossAmount.text() ?: ""
+    def mappedTaxLines = []
+    // Suppose itemNode.ItemTax returns one or more <ItemTax> nodes.
+    itemNode.ItemTax.each { taxNode ->
+        mappedTaxLines << createTaxLine(taxNode)
+    }
+    def allTaxLinesXml = mappedTaxLines.join("")
+
     def writer = new StringWriter()
     def xml = new MarkupBuilder(writer)
     
@@ -97,19 +174,14 @@ def String createLine(def itemNode) {
         Seller_identifier("")
         Quantity(itemNode.InvoicedQuantity.text() ?: "")
         Quantity_unit_code(itemNode.InvoicedQuantity.@unitCode?.toString() ?: "")
-        Net_price("")
-        Net_amount("")
+        Net_price(netPrice)
+        Gross_price(grossPrice)
+        Net_amount(netAmount)
+        Gross_amount(grossAmount)
         Standard_identifier("")
-        Net_price_with_line_allowances_charges("")
-        Net_amount_with_taxes("")
-        TAX_LINE {
-            Tax_category_ID("")
-            Tax_type("")
-            Tax_rate("")
-            Taxable_amount("")
-            Tax_amount("")
-            Tax_class("")
-        }
+        Net_price_with_line_allowances_charges(grossAmount)
+        Net_amount_with_taxes(grossAmount)
+        mkp.yieldUnescaped(allTaxLinesXml)
         ADDITIONAL_GROUP_LINE {
             Name("LINE_AMOUNTS")
             ADDITIONAL_GROUP_LINE_PROPERTY {
@@ -173,6 +245,14 @@ def Message processData(Message message) {
     def currency_code = input.Invoice.GrossAmount.@currencyCode
     def vatCurrencyCode = input.Invoice.TaxAmount.@currencyCode
 
+    items.each { item ->
+        // Call createLine for each Item node and add the result to our list.
+        mappedLines << createLine(item)
+        
+    }
+
+    def allLinesXml = mappedLines.join("")
+
     // Build the final response XML, appending the mapped party fragment.
     def sw = new StringWriter()
     def xml = new MarkupBuilder(sw)
@@ -195,6 +275,7 @@ def Message processData(Message message) {
             mkp.yieldUnescaped(mappedPartySUXml)
             mkp.yieldUnescaped(mappedPartyBYXml)
             mkp.yieldUnescaped(taxFragments.join('\n'))
+            mkp.yieldUnescaped(allLinesXml)
         }
     }
     
