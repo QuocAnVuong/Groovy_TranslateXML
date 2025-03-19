@@ -1,5 +1,6 @@
 import com.sap.gateway.ip.core.customdev.util.Message
 import groovy.xml.MarkupBuilder
+import java.io.StringWriter
 
 /**
  * createParty – Transforms a parsed Party XML node into the mapped PARTIES structure.
@@ -7,7 +8,7 @@ import groovy.xml.MarkupBuilder
  * @param partyNode the Party XML as a GPathResult (already parsed)
  * @return the mapped PARTIES XML (as a String)
  */
-def String createParty(def partyNode) {
+def String createParty(def partyNode, def partyType) {
     // Extract the necessary fields directly from the parsed node
     def supplierPartyID       = partyNode.SupplierPartyID.text()
     def addressName           = partyNode.Address.AddressName.text()
@@ -35,7 +36,7 @@ def String createParty(def partyNode) {
     def xml = new MarkupBuilder(sw)
     
     xml.PARTIES {
-        Qualifier("SU")
+        Qualifier(partyType)
         VAT_number(supplierPartyID ?: "")
         Address(streetName ?: "SU Address 1")
         Address_2(streetAddressName ?: "")
@@ -62,6 +63,56 @@ def String createParty(def partyNode) {
     
     return sw.toString()
 }
+
+/**
+ * createLine – Transforms an Item XML node into the mapped LINE structure.
+ *
+ * @param itemNode the parsed Item node (a GPathResult)
+ * @return the mapped LINE XML as a String
+ */
+def String createLine(def itemNode) {
+    def writer = new StringWriter()
+    def xml = new MarkupBuilder(writer)
+    
+    xml.LINE {
+        Line_ID(itemNode.SupplierInvoiceItemID.text() ?: "")
+        Description(itemNode.BillingDocumentItemText.text() ?: "")
+        Seller_identifier("")
+        Quantity(itemNode.InvoicedQuantity.text() ?: "")
+        Quantity_unit_code(itemNode.InvoicedQuantity.@unitCode?.toString() ?: "")
+        Net_price("")
+        Net_amount("")
+        Standard_identifier("")
+        Net_price_with_line_allowances_charges("")
+        Net_amount_with_taxes("")
+        TAX_LINE {
+            Tax_category_ID("")
+            Tax_type("")
+            Tax_rate("")
+            Taxable_amount("")
+            Tax_amount("")
+            Tax_class("")
+        }
+        ADDITIONAL_GROUP_LINE {
+            Name("LINE_AMOUNTS")
+            ADDITIONAL_GROUP_LINE_PROPERTY {
+                Name("LINE_AMOUNTS_NET_TAX_AMOUNT")
+                Value("")
+            }
+            ADDITIONAL_GROUP_LINE_PROPERTY {
+                Name("LINE_AMOUNTS_TOTAL_TAXABLE_AMOUNT")
+                Value("")
+            }
+            ADDITIONAL_GROUP_LINE_PROPERTY {
+                Name("LINE_AMOUNTS_FACTORY_TAX_AMOUNT")
+                Value("")
+            }
+        }
+    }
+    
+    return writer.toString()
+}
+
 
 /**
  * processData – The main function called by SAP CPI.
@@ -92,8 +143,8 @@ def Message processData(Message message) {
     }
     
     // Call createParty passing the already-parsed Party node.
-    def mappedPartySUXml = createParty(partySUFragment)
-    def mappedPartyBYXml = createParty(partyBYFragment)
+    def mappedPartySUXml = createParty(partySUFragment,"SU")
+    def mappedPartyBYXml = createParty(partyBYFragment,"BY")
     
     def currency_code = input.Invoice.GrossAmount.@currencyCode
     def vatCurrencyCode = input.Invoice.TaxAmount.@currencyCode
