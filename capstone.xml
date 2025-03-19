@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?><n0:InvoiceRequest xmlns:n0="http://sap.com/xi/EDI">
+  <MessageHeader>
+    <ID>4F6757FD6EC11EEFB5DB3B0DD3874808</ID>
+    <CreationDateTime>2025-01-20T02:54:20Z</CreationDateTime>
+    <SenderBusinessSystemID>0M5EUFR</SenderBusinessSystemID>
+  </MessageHeader>
+  <Invoice>
+    <SupplierInvoiceID>3VN8000225</SupplierInvoiceID>
+    <SupplierInvoiceTypeCode>004</SupplierInvoiceTypeCode>
+    <DocumentDate>2024-12-26</DocumentDate>
+    <GrossAmount currencyCode="VND">352000.0</GrossAmount>
+    <NetAmount currencyCode="VND">320000.0</NetAmount>
+    <TaxAmount currencyCode="VND">32000.0</TaxAmount>
+    <TaxDepartureCountry>VN</TaxDepartureCountry>
+    <TaxDestinationCountry>VN</TaxDestinationCountry>
+    <TaxCountry>VN</TaxCountry>
+    <SupplierVATRegistration>0315724616</SupplierVATRegistration>
+    <DocumentReferenceID>3VN8000225</DocumentReferenceID>
+    <SalesOrganization>VNE1</SalesOrganization>
+    <DistributionChannel>10</DistributionChannel>
+    <OrganizationDivision>10</OrganizationDivision>
+    <CompanyCode>VNE1</CompanyCode>
+    <Party PartyType="BillFrom">
+      <SupplierPartyID>7DDHVY5PBH</SupplierPartyID>
+      <Address>
+        <PostalCode>008484</PostalCode>
+        <CityName>Ho chi minh</CityName>
+        <Country>VN</Country>
+        <CorrespondenceLanguage>de</CorrespondenceLanguage>
+      </Address>
+    </Party>
+    <Party PartyType="SoldTo">
+      <SupplierPartyID>7DDHVY5PBH</SupplierPartyID>
+      <Address>
+        <AddressName>CÔNG TY CỔ PHẦN SẢN XUẤT VÀ XUẤT</AddressName>
+        <AddressAdditionalName>NHẬP KHẨU HNC</AddressAdditionalName>
+        <StreetName>thuộc Khu chức năng số 1 - Số 15, đường Trần Bạch Đằng</StreetName>
+        <StreetAddressName>thuộc Khu chức năng số 1 - Số 15, đường Trần Bạch Đằng</StreetAddressName>
+        <PostalCode>700000</PostalCode>
+        <CityName>Thành phố Thủ Đức, TP Hồ Chí Minh</CityName>
+        <Country>VN</Country>
+        <EmailAddress>sangtran@hncgroup.vn</EmailAddress>
+        <CorrespondenceLanguage>en</CorrespondenceLanguage>
+        <FullAddress>Tầng 19, Tháp B, Khu thương mại dịch vụ, kết hợp nhà ở cao tầng tại lô đất 1-13, thuộc Khu chức năng số 1 - Số 15, đường Trần Bạch Đằng, Phường Thủ Thiêm, Thành phố Thủ Đức, TP Hồ Chí Minh, 700000, Vietnam</FullAddress>
+      </Address>
+    </Party>
+    <Party PartyType="BillTo">
+      <SupplierPartyID>7DDHVY5PBH</SupplierPartyID>
+      <Address>
+        <AddressName>CÔNG TY CỔ PHẦN SẢN XUẤT VÀ XUẤT</AddressName>
+        <AddressAdditionalName>NHẬP KHẨU HNC</AddressAdditionalName>
+        <StreetName>thuộc Khu chức năng số 1 - Số 15, đường Trần Bạch Đằng</StreetName>
+        <StreetAddressName>thuộc Khu chức năng số 1 - Số 15, đường Trần Bạch Đằng</StreetAddressName>
+        <PostalCode>700000</PostalCode>
+        <CityName>Thành phố Thủ Đức, TP Hồ Chí Minh</CityName>
+        <Country>VN</Country>
+        <EmailAddress>sangtran@hncgroup.vn</EmailAddress>
+        <CorrespondenceLanguage>en</CorrespondenceLanguage>
+      </Address>
+    </Party>
+    <Party PartyType="Payer">
+      <SupplierPartyID>7DDHVY5PBH</SupplierPartyID>
+      <Address>
+        <AddressName>CÔNG TY CỔ PHẦN SẢN XUẤT VÀ XUẤT</AddressName>
+        <AddressAdditionalName>NHẬP KHẨU HNC</AddressAdditionalName>
+        <StreetName>thuộc Khu chức năng số 1 - Số 15, đường Trần Bạch Đằng</StreetName>
+        <StreetAddressName>thuộc Khu chức năng số 1 - Số 15, đường Trần Bạch Đằng</StreetAddressName>
+        <PostalCode>700000</PostalCode>
+        <CityName>Thành phố Thủ Đức, TP Hồ Chí Minh</CityName>
+        <Country>VN</Country>
+        <EmailAddress>sangtran@hncgroup.vn</EmailAddress>
+        <CorrespondenceLanguage>en</CorrespondenceLanguage>
+      </Address>
+    </Party>
+    <Party PartyType="ShipTo">
+      <SupplierPartyID>7DDHVY5PBH</SupplierPartyID>
+      <Address>
+        <AddressName>CÔNG TY CỔ PHẦN SẢN XUẤT VÀ XUẤT</AddressName>
+        <AddressAdditionalName>NHẬP KHẨU HNC</AddressAdditionalName>
+        <StreetName>thuộc Khu chức năng số 1 - Số 15, đường Trần Bạch Đằng</StreetName>
+        <StreetAddressName>thuộc Khu chức năng số 1 - Số 15, đường Trần Bạch Đằng</StreetAddressName>
+        <PostalCode>700000</PostalCode>
+        <CityName>Thành phố Thủ Đức, TP Hồ Chí Minh</CityName>
+        <Country>VN</Country>
+        <EmailAddress>sangtran@hncgroup.vn</EmailAddress>
+        <CorrespondenceLanguage>en</CorrespondenceLanguage>
+      </Address>
+    </Party>
+    <PaymentTerms>
+      <DueCalculationBaseDate>2024-12-26</DueCalculationBaseDate>
+      <CashDiscount1Days>30</CashDiscount1Days>
+    </PaymentTerms>
+    <HeaderTax>
+      <SupplierTaxTypeCode>AS</SupplierTaxTypeCode>
+      <Amount currencyCode="VND">32000.0</Amount>
+      <TaxPercentage>10.0</TaxPercentage>
+    </HeaderTax>
+    <Item>
+      <BillingDocumentItemText>Representation</BillingDocumentItemText>
+      <SupplierInvoiceItemID>10</SupplierInvoiceItemID>
+      <SupplierInvoiceItemTypeCode>002</SupplierInvoiceItemTypeCode>
+      <GrossAmount currencyCode="VND">352000.0</GrossAmount>
+      <NetAmount currencyCode="VND">320000.0</NetAmount>
+      <TaxAmount currencyCode="VND">32000.0</TaxAmount>
+      <InvoicedQuantity unitCode="EA">1.0</InvoicedQuantity>
+      <PurchaseOrderID>Test</PurchaseOrderID>
+      <ServicesRenderedDate>2024-12-26</ServicesRenderedDate>
+      <PricingElement>
+        <SupplierConditionTypeName languageCode="en">Gross Value</SupplierConditionTypeName>
+        <ConditionRateValue valueUnit="VND">320000.0</ConditionRateValue>
+        <ConditionQuantity unitCode="EA">1.0</ConditionQuantity>
+        <ConditionAmount currencyCode="VND">320000.0</ConditionAmount>
+        <ConditionBaseValue valueUnit="EA">1.0</ConditionBaseValue>
+      </PricingElement>
+      <PricingElement>
+        <SupplierConditionTypeName languageCode="en">Net Value 1</SupplierConditionTypeName>
+        <ConditionRateValue valueUnit="VND">320000.0</ConditionRateValue>
+        <ConditionQuantity unitCode="EA">1.0</ConditionQuantity>
+        <ConditionAmount currencyCode="VND">320000.0</ConditionAmount>
+        <ConditionBaseValue valueUnit="EA">1.0</ConditionBaseValue>
+      </PricingElement>
+      <Product>
+        <SupplierProductID>REP</SupplierProductID>
+      </Product>
+      <ItemTax>
+        <SupplierTaxTypeCode>AS</SupplierTaxTypeCode>
+        <Amount currencyCode="VND">32000.0</Amount>
+        <TaxPercentage>10.0</TaxPercentage>
+        <TaxDeterminationDate>2024-12-26</TaxDeterminationDate>
+        <TaxRateValidityStartDate>1900-01-01</TaxRateValidityStartDate>
+      </ItemTax>
+      <HigherLevelItem>000000</HigherLevelItem>
+      <n1:YY1_StatWBSExt xmlns:n1="http://SAPCustomFields.com/YY1_">VNE1-AME-ACT-LOCL</n1:YY1_StatWBSExt>
+      <n1:YY1_StatWBSInt xmlns:n1="http://SAPCustomFields.com/YY1_">00024614</n1:YY1_StatWBSInt>
+    </Item>
+    <Item>
+      <BillingDocumentItemText>Representation</BillingDocumentItemText>
+      <SupplierInvoiceItemID>10</SupplierInvoiceItemID>
+      <SupplierInvoiceItemTypeCode>002</SupplierInvoiceItemTypeCode>
+      <GrossAmount currencyCode="VND">352000.0</GrossAmount>
+      <NetAmount currencyCode="VND">320000.0</NetAmount>
+      <TaxAmount currencyCode="VND">32000.0</TaxAmount>
+      <InvoicedQuantity unitCode="EA">1.0</InvoicedQuantity>
+      <PurchaseOrderID>Test</PurchaseOrderID>
+      <ServicesRenderedDate>2024-12-26</ServicesRenderedDate>
+      <PricingElement>
+        <SupplierConditionTypeName languageCode="en">Gross Value</SupplierConditionTypeName>
+        <ConditionRateValue valueUnit="VND">320000.0</ConditionRateValue>
+        <ConditionQuantity unitCode="EA">1.0</ConditionQuantity>
+        <ConditionAmount currencyCode="VND">320000.0</ConditionAmount>
+        <ConditionBaseValue valueUnit="EA">1.0</ConditionBaseValue>
+      </PricingElement>
+      <PricingElement>
+        <SupplierConditionTypeName languageCode="en">Net Value 1</SupplierConditionTypeName>
+        <ConditionRateValue valueUnit="VND">320000.0</ConditionRateValue>
+        <ConditionQuantity unitCode="EA">1.0</ConditionQuantity>
+        <ConditionAmount currencyCode="VND">320000.0</ConditionAmount>
+        <ConditionBaseValue valueUnit="EA">1.0</ConditionBaseValue>
+      </PricingElement>
+      <Product>
+        <SupplierProductID>REP</SupplierProductID>
+      </Product>
+      <ItemTax>
+        <SupplierTaxTypeCode>AS</SupplierTaxTypeCode>
+        <Amount currencyCode="VND">32000.0</Amount>
+        <TaxPercentage>10.0</TaxPercentage>
+        <TaxDeterminationDate>2024-12-11</TaxDeterminationDate>
+        <TaxRateValidityStartDate>1900-01-01</TaxRateValidityStartDate>
+      </ItemTax>
+      <HigherLevelItem>000000</HigherLevelItem>
+      <n1:YY1_StatWBSExt xmlns:n1="http://SAPCustomFields.com/YY1_">VNE1-AME-ACT-LOCL</n1:YY1_StatWBSExt>
+      <n1:YY1_StatWBSInt xmlns:n1="http://SAPCustomFields.com/YY1_">00024614</n1:YY1_StatWBSInt>
+    </Item>
+    <n1:YY1_SD_BP_Vat xmlns:n1="http://SAPCustomFields.com/YY1_">0315025015</n1:YY1_SD_BP_Vat>
+    <n1:YY1_SD_BP_CountryName xmlns:n1="http://SAPCustomFields.com/YY1_">Vietnam</n1:YY1_SD_BP_CountryName>
+    <n1:YY1_SD_Company_Vat xmlns:n1="http://SAPCustomFields.com/YY1_">0315724616</n1:YY1_SD_Company_Vat>
+    <InvoiceType>Local</InvoiceType>
+    <DocumentType>Invoice</DocumentType>
+    <CreditMemoType/>
+    <ProxyID>C72</ProxyID>
+    <YY1_EINV_CODE1_BDH/>
+    <YY1_EINV_CODE2_BDH/>
+    <YY1_EINV_AUTHORIZATION_BDH/>
+    <YY1_EINV_DATETIME_BDH/>
+  </Invoice>
+</n0:InvoiceRequest>
