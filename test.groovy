@@ -1,12 +1,29 @@
 import com.sap.gateway.ip.core.customdev.util.Message
 import groovy.xml.MarkupBuilder
 
-/**
- * createParty – Transforms a parsed Party XML node into the mapped PARTIES structure.
- *
- * @param partyNode the Party XML as a GPathResult (already parsed)
- * @return the mapped PARTIES XML (as a String)
- */
+def String createTax(def headerTax, def item) {
+    def supplierTaxTypeCode = headerTax.SupplierTaxTypeCode?.text() ?: ''
+    def amount              = headerTax.Amount?.text() ?: ''
+    def taxCurrencyCode     = headerTax.Amount[0]?.@currencyCode ?: ''
+    def taxPercentage       = headerTax.TaxPercentage?.text() ?: ''
+
+    def itemTax             = item.ItemTax
+    def taxPointDate        = itemTax?.TaxDeterminationDate?.text() ?: ''
+
+    def sw = new StringWriter()
+    def xml = new MarkupBuilder(sw)
+
+    xml.TAX {
+        Tax_amount(amount)
+        Tax_type(supplierTaxTypeCode)
+        Tax_rate(taxPercentage)
+        Tax_CurrencyCode(taxCurrencyCode)
+        Tax_point_date(taxPointDate)
+    }
+
+    return sw.toString()
+}
+
 def String createParty(def partyNode) {
     // Extract the necessary fields directly from the parsed node
     def supplierPartyID       = partyNode.SupplierPartyID.text()
@@ -82,6 +99,13 @@ def Message processData(Message message) {
     def partySUFragment = input.Invoice.Party.find { it.@PartyType == "BillTo" }
     def partyBYFragment = input.Invoice.Party.find { it.@PartyType == "SoldTo" }
 
+    // Find the Tax element
+    def headerTax = invoice.HeaderTax
+    def items = invoice.Item
+    def taxFragments = items.collect { item ->
+        createTax(headerTax, item)
+    }
+
     if (!partySUFragment) {
         message.setBody("<Response><Error>Party with PartyType 'BillTo' not found.</Error></Response>")
         return message
@@ -119,6 +143,7 @@ def Message processData(Message message) {
             Invoice_total("")
             mkp.yieldUnescaped(mappedPartySUXml)
             mkp.yieldUnescaped(mappedPartyBYXml)
+            mkp.yieldUnescaped(taxFragments.join('\n'))
         }
     }
     
