@@ -2,42 +2,26 @@ import com.sap.gateway.ip.core.customdev.util.Message
 import groovy.xml.MarkupBuilder
 import java.io.StringWriter
 
-/**
- * createTax – Uses HeaderTax and Item nodes to map a TAX XML structure.
- *
- * @param itemNode the parsed Item node (a GPathResult)
- * @return the mapped LINE XML as a String
- */
-def String createTax(def headerTax, def item) {
-    def supplierTaxTypeCode = headerTax.SupplierTaxTypeCode?.text() ?: ''
+def String createTax(def headerTax) {
     def amount              = headerTax.Amount?.text() ?: ''
     def taxCurrencyCode     = headerTax.Amount[0]?.@currencyCode ?: ''
     def taxPercentage       = headerTax.TaxPercentage?.text() ?: ''
-
-    def itemTax             = item.ItemTax
-    def taxPointDate        = itemTax?.TaxDeterminationDate?.text() ?: ''
 
     def sw = new StringWriter()
     def xml = new MarkupBuilder(sw)
 
     xml.TAX {
         Tax_amount(amount)
-        Tax_type(supplierTaxTypeCode)
+        Tax_category_ID("01")
+        Tax_type("VAT")
         Tax_rate(taxPercentage)
+        Tax_class("08")
         Tax_CurrencyCode(taxCurrencyCode)
-        Tax_point_date(taxPointDate)
     }
 
     return sw.toString()
 }
 
-/**
- * createParty – Transforms a Party XML node into the mapped PARTIES structure.
- *
- * @param partyNode the parsed Party node (a GPathResult)
- * @param partyType the type of party (SU or BY)
- * @return the mapped PARTIES XML as a String
- */
 def String createParty(def partyNode, def partyType) {
     // Extract the necessary fields directly from the parsed node
     def supplierPartyID       = partyNode.SupplierPartyID.text()
@@ -67,7 +51,6 @@ def String createParty(def partyNode, def partyType) {
     
     xml.PARTIES {
         Qualifier(partyType)
-        Qualifier(partyType)
         VAT_number(supplierPartyID ?: "")
         Address(streetName ?: "SU Address 1")
         Address_2(streetAddressName ?: "")
@@ -96,11 +79,12 @@ def String createParty(def partyNode, def partyType) {
 }
 
 /**
- * createLine – Transforms an ItemTax inside an Item XML node into the mapped LINE structure.
+ * createLine – Transforms an Item XML node into the mapped LINE structure.
  *
  * @param itemNode the parsed Item node (a GPathResult)
  * @return the mapped LINE XML as a String
  */
+
 def String createTaxLine(def itemTaxNode) {
     def supplierTaxTypeCode = itemTaxNode.SupplierTaxTypeCode.text() ?: '' 
     def amount = itemTaxNode.Amount.text() ?: ''
@@ -214,6 +198,20 @@ def String createLine(def itemNode) {
         //     }
         // }
     }
+    
+    return writer.toString()
+}
+
+def String createPaymentInstruction(def paymentNode) {
+    def writer = new StringWriter()
+    def xml = new MarkupBuilder(writer)
+    
+    xml.PAYMENT_INSTRUCTIONS {
+        Payment_due_date()
+        Payment_means("")
+        Payment_amount("")
+    }
+    
     return writer.toString()
 }
 
@@ -239,12 +237,7 @@ def Message processData(Message message) {
 
     // Find the Tax element
     def headerTax = input.Invoice.HeaderTax
-    def items = input.Invoice.Item
-    def headerTax = input.Invoice.HeaderTax
-    def items = input.Invoice.Item
-    def taxFragments = items.collect { item ->
-        createTax(headerTax, item)
-    }
+    def taxFragments = createTax(headerTax)
 
     if (!partySUFragment) {
         message.setBody("<Response><Error>Party with PartyType 'BillTo' not found.</Error></Response>")
@@ -258,20 +251,10 @@ def Message processData(Message message) {
     // Call createParty passing the already-parsed Party node.
     def mappedPartySUXml = createParty(partySUFragment,"SU")
     def mappedPartyBYXml = createParty(partyBYFragment,"BY")
-    def mappedPartySUXml = createParty(partySUFragment,"SU")
-    def mappedPartyBYXml = createParty(partyBYFragment,"BY")
-    
+
     def currency_code = input.Invoice.GrossAmount.@currencyCode
     def vatCurrencyCode = input.Invoice.TaxAmount.@currencyCode
-    def mappedLines = []
-
-    items.each { item ->
-        // Call createLine for each Item node and add the result to our list.
-        mappedLines << createLine(item)
-        
-    }
-
-    def allLinesXml = mappedLines.join("")
+    def items = input.Invoice.Item
     def mappedLines = []
 
     items.each { item ->
@@ -289,7 +272,7 @@ def Message processData(Message message) {
     xml.Response {
         Header {
             Invoice_number("")
-            Project("")
+            Project("CR_DGT")
             Date(input.Invoice.DocumentDate?: new Date().format("yyyy-MM-dd'T'HH:mm:ss"))
             Type("FE")
             UUID("")
@@ -304,7 +287,11 @@ def Message processData(Message message) {
             mkp.yieldUnescaped(mappedPartySUXml)
             mkp.yieldUnescaped(mappedPartyBYXml)
             mkp.yieldUnescaped(taxFragments.join('\n'))
-            mkp.yieldUnescaped(allLinesXml)
+            PAYMENT_INSTRUCTIONS{
+                Payment_due_date(input.Invoice.PaymentTerms.DueCalculationBaseDate)
+                Payment_means("01")
+                Payment_amount(input.Invoice.GrossAmount)
+            }
             mkp.yieldUnescaped(allLinesXml)
         }
     }
