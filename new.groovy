@@ -226,23 +226,15 @@ def String createPaymentInstruction(def paymentNode) {
 def Message processData(Message message) {
     // Read the full input XML payload as a String
     def body = message.getBody(String)
-    
+
     // Parse the entire XML using XmlSlurper
     def input = new XmlSlurper().parseText(body)
-    
-    // Find the Party element with PartyType="BillFrom" (adjust this if needed)
+
+    // Find the Party elements
     def partySUFragment = input.Invoice.Party.find { it.@PartyType == "BillTo" }
     def partyBYFragment = input.Invoice.Party.find { it.@PartyType == "SoldTo" }
 
-    // Find the Tax element
-    def headerTax = input.Invoice.HeaderTax
-    def taxFragments = []
-    input.Invoice.HeaderTax.each { headerTax ->
-        taxFragments << createTax(headerTax)
-        }
-        
-    mkp.yieldUnescaped(taxFragments.join('\n'))
-
+    // Guard clauses for missing parties
     if (!partySUFragment) {
         message.setBody("<Response><Error>Party with PartyType 'BillTo' not found.</Error></Response>")
         return message
@@ -251,55 +243,67 @@ def Message processData(Message message) {
         message.setBody("<Response><Error>Party with PartyType 'SoldTo' not found.</Error></Response>")
         return message
     }
-    
-    // Call createParty passing the already-parsed Party node.
-    def mappedPartySUXml = createParty(partySUFragment,"SU")
-    def mappedPartyBYXml = createParty(partyBYFragment,"BY")
 
-    def currency_code = input.Invoice.GrossAmount.@currencyCode
-    def vatCurrencyCode = input.Invoice.TaxAmount.@currencyCode
-    def items = input.Invoice.Item
-    def mappedLines = []
+    // Map parties
+    def mappedPartySUXml = createParty(partySUFragment, "SU")
+    def mappedPartyBYXml = createParty(partyBYFragment, "BY")
 
-    items.each { item ->
-        // Call createLine for each Item node and add the result to our list.
-        mappedLines << createLine(item)
-        
+    // Map header taxes (supporting multiple)
+    def taxFragments = []
+    input.Invoice.HeaderTax.each { headerTax ->
+        taxFragments << createTax(headerTax)
     }
 
-    def allLinesXml = mappedLines.join("")
+    // Map lines
+    def items = input.Invoice.Item
+    def mappedLines = []
+    items.each { item ->
+        mappedLines << createLine(item)
+    }
 
-    // Build the final response XML, appending the mapped party fragment.
+    // Currency codes
+    def currency_code = input.Invoice.GrossAmount.@currencyCode
+    def vatCurrencyCode = input.Invoice.TaxAmount.@currencyCode
+
+    // Build the final XML
     def sw = new StringWriter()
     def xml = new MarkupBuilder(sw)
-    
+
     xml.Response {
         Header {
-            Invoice_number("")
+            Invoice_number(input.Invoice.SupplierInvoiceID.text() ?: "")
             Project("CR_DGT")
-            Date(input.Invoice.DocumentDate?: new Date().format("yyyy-MM-dd'T'HH:mm:ss"))
+            Date(input.Invoice.DocumentDate ?: new Date().format("yyyy-MM-dd'T'HH:mm:ss"))
             Type("FE")
-            UUID("")
+            UUID("") // Should be mapped if available
             Copy_indicator("")
-            Currency_code(currency_code?:"")
-            VAT_currency_code(vatCurrencyCode?:"")
+            Currency_code(currency_code ?: "")
+            VAT_currency_code(vatCurrencyCode ?: "")
             Payment_terms_code("01")
             Exchange_rate(1)
             Payment_means("04")
-            Total_VAT_amount(input.Invoice.TaxAmount)
-            Invoice_total("")
+            Total_VAT_amount(input.Invoice.TaxAmount.text() ?: "")
+            Invoice_total(input.Invoice.GrossAmount.text() ?: "")
+
+            // Inject parties
             mkp.yieldUnescaped(mappedPartySUXml)
             mkp.yieldUnescaped(mappedPartyBYXml)
+
+            // Inject header taxes
             mkp.yieldUnescaped(taxFragments.join('\n'))
-            PAYMENT_INSTRUCTIONS{
-                Payment_due_date(input.Invoice.PaymentTerms.DueCalculationBaseDate)
+
+            // Inject payment instructions
+            PAYMENT_INSTRUCTIONS {
+                Payment_due_date(input.Invoice.PaymentTerms.DueCalculationBaseDate.text() ?: "")
                 Payment_means("01")
-                Payment_amount(input.Invoice.GrossAmount)
+                Payment_amount(input.Invoice.GrossAmount.text() ?: "")
             }
-            mkp.yieldUnescaped(allLinesXml)
+
+            // Inject item lines
+            mkp.yieldUnescaped(mappedLines.join(''))
         }
     }
-    
+
     message.setBody(sw.toString())
     return message
 }
