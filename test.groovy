@@ -102,7 +102,6 @@ def String createParty(def partyNode, def partyType) {
  * @return the mapped LINE XML as a String
  */
 def String createTaxLine(def itemTaxNode) {
-    def supplierTaxTypeCode = itemTaxNode.SupplierTaxTypeCode.text() ?: '' 
     def amount = itemTaxNode.Amount.text() ?: ''
     def taxPercentage = itemTaxNode.TaxPercentage.text() ?: ''
 
@@ -110,8 +109,8 @@ def String createTaxLine(def itemTaxNode) {
     def xml = new MarkupBuilder(writer)
     
     xml.TAX_LINE {
-        Tax_category_ID("")
-        Tax_type(supplierTaxTypeCode) 
+        Tax_category_ID("01") //hardcoded for now
+        Tax_type("VAT") // hardcoded for now
         Tax_rate(taxPercentage)
         Taxable_amount("")
         Tax_amount(amount)
