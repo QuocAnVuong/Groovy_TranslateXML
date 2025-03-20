@@ -67,6 +67,7 @@ def String createParty(def partyNode, def partyType) {
     
     xml.PARTIES {
         Qualifier(partyType)
+        Qualifier(partyType)
         VAT_number(supplierPartyID ?: "")
         Address(streetName ?: "SU Address 1")
         Address_2(streetAddressName ?: "")
@@ -239,6 +240,8 @@ def Message processData(Message message) {
     // Find the Tax element
     def headerTax = input.Invoice.HeaderTax
     def items = input.Invoice.Item
+    def headerTax = input.Invoice.HeaderTax
+    def items = input.Invoice.Item
     def taxFragments = items.collect { item ->
         createTax(headerTax, item)
     }
@@ -255,9 +258,20 @@ def Message processData(Message message) {
     // Call createParty passing the already-parsed Party node.
     def mappedPartySUXml = createParty(partySUFragment,"SU")
     def mappedPartyBYXml = createParty(partyBYFragment,"BY")
+    def mappedPartySUXml = createParty(partySUFragment,"SU")
+    def mappedPartyBYXml = createParty(partyBYFragment,"BY")
     
     def currency_code = input.Invoice.GrossAmount.@currencyCode
     def vatCurrencyCode = input.Invoice.TaxAmount.@currencyCode
+    def mappedLines = []
+
+    items.each { item ->
+        // Call createLine for each Item node and add the result to our list.
+        mappedLines << createLine(item)
+        
+    }
+
+    def allLinesXml = mappedLines.join("")
     def mappedLines = []
 
     items.each { item ->
@@ -290,6 +304,7 @@ def Message processData(Message message) {
             mkp.yieldUnescaped(mappedPartySUXml)
             mkp.yieldUnescaped(mappedPartyBYXml)
             mkp.yieldUnescaped(taxFragments.join('\n'))
+            mkp.yieldUnescaped(allLinesXml)
             mkp.yieldUnescaped(allLinesXml)
         }
     }
