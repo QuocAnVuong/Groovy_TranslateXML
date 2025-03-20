@@ -167,6 +167,13 @@
         <TaxDeterminationDate>2024-12-11</TaxDeterminationDate>
         <TaxRateValidityStartDate>1900-01-01</TaxRateValidityStartDate>
       </ItemTax>
+      <ItemTax>
+        <SupplierTaxTypeCode>Hi</SupplierTaxTypeCode>
+        <Amount currencyCode="VND">32000.0</Amount>
+        <TaxPercentage>10.0</TaxPercentage>
+        <TaxDeterminationDate>2024-12-11</TaxDeterminationDate>
+        <TaxRateValidityStartDate>1900-01-01</TaxRateValidityStartDate>
+      </ItemTax>
       <HigherLevelItem>000000</HigherLevelItem>
       <n1:YY1_StatWBSExt xmlns:n1="http://SAPCustomFields.com/YY1_">VNE1-AME-ACT-LOCL</n1:YY1_StatWBSExt>
       <n1:YY1_StatWBSInt xmlns:n1="http://SAPCustomFields.com/YY1_">00024614</n1:YY1_StatWBSInt>
